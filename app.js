@@ -26,13 +26,36 @@ app.get("/check", async (request, response, next) => {
 // Route for getting all polls including the options with them.
 app.get("/polls", async (request, response, next) => {
   try {
-    const allPolls = await Polls.findAll({
-        include: Options,
-    });
+    // Uses query `?include=true` to also get all the polls with options & votes attached. 
+    const include = request.query.include
+    const where = include === 'true' ?  {
+      include: [{model: Options, include: Votes},]
+    } : {}
+    
+    const allPolls = await Polls.findAll(where);
     if (!allPolls) {
       return response.status(404).send("No polls were found.");
     }
     return response.status(200).json(allPolls);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Route for getting a poll by its Id.
+app.get("/polls/:id", async (request, response, next) => {
+  try {
+    const id = Number(request.params.id);
+    const include = request.query.include
+    const where = include === 'true' ?  {
+      include: [{model: Options, include: Votes},]
+    } : {}
+
+    const poll = await Polls.findByPk(id, where);
+    if (!poll) {
+      return response.status(404).send("Fail to find post with id: " + id);
+    }
+    return response.status(200).json(poll);
   } catch (error) {
     next(error);
   }
@@ -54,20 +77,6 @@ app.post("/polls", validatePollCreation, async (request, response, next) => {
       return response.status(404).send("Failed to add new Poll");
     }
     return response.status(201).json(newPoll);
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Route for getting a poll by its Id.
-app.get("/polls/:id", async (request, response, next) => {
-  try {
-    const id = Number(request.params.id);
-    const poll = await Polls.findByPk(id);
-    if (!poll) {
-      return response.status(404).send("Fail to find post with id: " + id);
-    }
-    return response.status(200).json(poll);
   } catch (error) {
     next(error);
   }
