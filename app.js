@@ -26,9 +26,14 @@ app.get("/check", async (request, response, next) => {
 // Route for getting all polls including the options with them.
 app.get("/polls", async (request, response, next) => {
   try {
-    const allPolls = await Polls.findAll({
-        include: Options,
-    });
+    // Uses query `?include=true` to also get all the polls with options & votes attached. 
+    const include = request.query.include
+    const where = include === 'true' ?  {
+      include: [
+          {model: Options, include: Votes},
+        ]
+    } : {}
+    const allPolls = await Polls.findAll(where);
     if (!allPolls) {
       return response.status(404).send("No polls were found.");
     }
