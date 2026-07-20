@@ -9,15 +9,15 @@ Polls.hasMany(Options, {
     hooks: true,
 })
 Options.belongsTo(Polls,{
-    foreignKey: "pollsId"
+    foreignKey: "pollId"
 })
 Options.hasMany(Votes, {
-    foreignKey: "voteId",
+    foreignKey: "optionId",
     onDelete: "CASCADE",
     hooks: true,
 })
 Votes.belongsTo(Options, {
-    foreignKey: "voteId"
+    foreignKey: "optionId"
 })
 
-module.exports = {dbConnection , Polls, Votes, Options};
+module.exports = {dbConnection, Polls, Votes, Options};
