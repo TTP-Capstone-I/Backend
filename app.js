@@ -29,10 +29,9 @@ app.get("/polls", async (request, response, next) => {
     // Uses query `?include=true` to also get all the polls with options & votes attached. 
     const include = request.query.include
     const where = include === 'true' ?  {
-      include: [
-          {model: Options, include: Votes},
-        ]
+      include: [{model: Options, include: Votes},]
     } : {}
+    
     const allPolls = await Polls.findAll(where);
     if (!allPolls) {
       return response.status(404).send("No polls were found.");
@@ -49,9 +48,7 @@ app.get("/polls/:id", async (request, response, next) => {
     const id = Number(request.params.id);
     const include = request.query.include
     const where = include === 'true' ?  {
-      include: [
-          {model: Options, include: Votes},
-        ]
+      include: [{model: Options, include: Votes},]
     } : {}
 
     const poll = await Polls.findByPk(id, where);
