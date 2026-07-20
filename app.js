@@ -43,6 +43,27 @@ app.get("/polls", async (request, response, next) => {
   }
 });
 
+// Route for getting a poll by its Id.
+app.get("/polls/:id", async (request, response, next) => {
+  try {
+    const id = Number(request.params.id);
+    const include = request.query.include
+    const where = include === 'true' ?  {
+      include: [
+          {model: Options, include: Votes},
+        ]
+    } : {}
+
+    const poll = await Polls.findByPk(id, where);
+    if (!poll) {
+      return response.status(404).send("Fail to find post with id: " + id);
+    }
+    return response.status(200).json(poll);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // This function should check if poll can be created before continuing.
 // If there is no title and description return status 400 with a message.
 // Otherwise continue.
@@ -59,20 +80,6 @@ app.post("/polls", validatePollCreation, async (request, response, next) => {
       return response.status(404).send("Failed to add new Poll");
     }
     return response.status(201).json(newPoll);
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Route for getting a poll by its Id.
-app.get("/polls/:id", async (request, response, next) => {
-  try {
-    const id = Number(request.params.id);
-    const poll = await Polls.findByPk(id);
-    if (!poll) {
-      return response.status(404).send("Fail to find post with id: " + id);
-    }
-    return response.status(200).json(poll);
   } catch (error) {
     next(error);
   }
