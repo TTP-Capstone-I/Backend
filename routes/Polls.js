@@ -50,9 +50,15 @@ router.get("/polls/:id", async (request, response, next) => {
 // If there is no title and description return status 400 with a message.
 // Otherwise continue.
 function validatePollCreation(request, response, next) {
-    next()
-}
+  const{ title, description} = request.body;
 
+  if( !title || !description){
+    console.log("validation failed!");
+    return response.status(400).send("Title and description are required!");
+  }
+  console.log("validation passed!");
+  next();
+}
 // Route for creating a new poll.
 // Later create a validation middleware.
 router.post("/polls", validatePollCreation, async (request, response, next) => {
