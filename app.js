@@ -35,8 +35,8 @@ app.get("/check", async (request, response, next) => {
 });
 
 function logErrors(error, request, response, next) {
-    console.error(error)
-    next()
+  console.error(error)
+  next()
 }
 app.use(logErrors)
 
