@@ -2,7 +2,7 @@ const dbConnection = require("../db");
 const Polls = require("./polls");
 const Votes = require("./votes");
 const Options = require("./options");
-
+const Users = require("./users");
 Polls.hasMany(Options, {
   foreignKey: "pollId",
   onDelete: "CASCADE",
@@ -19,5 +19,7 @@ Options.hasMany(Votes, {
 Votes.belongsTo(Options, {
   foreignKey: "optionId",
 });
-
-module.exports = { dbConnection, Polls, Votes, Options };
+Users.hasMany(Votes, {
+  foreignKey: "userId",
+})
+module.exports = { dbConnection, Polls, Votes, Options, Users };

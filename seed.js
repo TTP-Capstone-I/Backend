@@ -4,6 +4,8 @@ const dbConnection = require("./db");
 const Polls = allModels.Polls;
 const Options = allModels.Options;
 const Votes = allModels.Votes;
+const Users = allModels.Users;
+
 
 async function seed(){
     await dbConnection.sync({force: true})
@@ -38,6 +40,10 @@ async function seed(){
     const VoteFour = await Votes.create({
         name: "Vote Four",
         optionId: optionOne.id
+    })
+    const UserOne = await Users.create({
+        name: "User One",
+        email: process.env.email
     })
     console.log("SEEDED!")
     dbConnection.close()

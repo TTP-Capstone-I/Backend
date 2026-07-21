@@ -1,9 +1,9 @@
 const express = require("express");
 const app = express();
-const router = express.Router()
+const router = express.Router();
 
 const allModels = require("../models");
-const dbConnection = allModels.dbConnection
+const dbConnection = allModels.dbConnection;
 const Polls = allModels.Polls;
 const Options = allModels.Options;
 const Votes = allModels.Votes;
@@ -92,4 +92,4 @@ router.delete("/votes/:id", validateVote, async (request, response, next) => {
     }
 });
 
-module.exports = router
+module.exports = router;

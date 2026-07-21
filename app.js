@@ -11,10 +11,13 @@ const dbConnection = require("./db");
 const pollsRouter = allRoutes.pollsRouter
 const optionsRouter = allRoutes.optionsRouter
 const votesRouter = allRoutes.votesRouter
+const usersRouter =  allRoutes.usersRouter
 
 const Polls = allModels.Polls;
 const Options = allModels.Options;
 const Votes = allModels.Votes;
+const Users = allModels.Users;
+
 
 const PORT = process.env.PORT;
 
@@ -26,6 +29,7 @@ app.use(cors())
 app.use(pollsRouter)
 app.use(optionsRouter)
 app.use(votesRouter)
+app.use(usersRouter)
 
 // Route for checking if the server works or not.
 app.get("/check", async (request, response, next) => {
