@@ -1,6 +1,7 @@
 require("dotenv").config();
 const morgan = require("morgan");
 const express = require("express");
+const cors = require("cors")
 const app = express();
 
 const allRoutes = require('./routes')
@@ -22,6 +23,7 @@ const PORT = process.env.PORT;
 
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(cors())
 
 // Make express use the routes we created.
 app.use(pollsRouter)
@@ -39,8 +41,8 @@ app.get("/check", async (request, response, next) => {
 });
 
 function logErrors(error, request, response, next) {
-    console.error(error)
-    next()
+  console.error(error)
+  next()
 }
 app.use(logErrors)
 

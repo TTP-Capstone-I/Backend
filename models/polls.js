@@ -1,15 +1,15 @@
-const { DataTypes} = require('sequelize');
+const { DataTypes } = require('sequelize');
 const dbConnection = require('../db')
 
-const Polls = dbConnection.define('poll',{
-    title:{
+const Polls = dbConnection.define('poll', {
+    title: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    description:{
+    description: {
         type: DataTypes.STRING,
         allowNull: false
     }
-} );
+});
 
 module.exports = Polls
