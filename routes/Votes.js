@@ -1,9 +1,9 @@
 const express = require("express");
 const app = express();
-const router = express.Router()
+const router = express.Router();
 
 const allModels = require("../models");
-const dbConnection = allModels.dbConnection
+const dbConnection = allModels.dbConnection;
 const Polls = allModels.Polls;
 const Options = allModels.Options;
 const Votes = allModels.Votes;
@@ -11,7 +11,7 @@ const Votes = allModels.Votes;
 // Route for getting all votes.
 router.get("/votes", async (request, response, next) => {
   try {
-    const allVotes = await Votes.findAll()
+    const allVotes = await Votes.findAll();
     if (!allVotes) {
       return response.status(404).send("No Votes were found.");
     }
@@ -39,9 +39,9 @@ router.get("/votes/:id", async (request, response, next) => {
 // If there is no name or optionId return status 400 with a message.
 // Otherwise continue.
 function validateVote(request, response, next) {
-  const{ name, optionId} = request.body;
+  const { name, optionId } = request.body;
 
-  if( !name || !optionId){
+  if (!name || !optionId) {
     console.log("validation failed!");
     return response.status(400).send("Name and optionId are required!");
   }
@@ -49,8 +49,8 @@ function validateVote(request, response, next) {
   next();
 }
 
-// Route for posting a vote 
-router.post("/votes", validateVote,  async (request, response, next) => {
+// Route for posting a vote
+router.post("/votes", validateVote, async (request, response, next) => {
   try {
     const newVote = await Votes.create(request.body);
     if (!newVote) {
@@ -63,7 +63,7 @@ router.post("/votes", validateVote,  async (request, response, next) => {
 });
 
 // Route for updating a vote
-router.patch("/votes/:id", validateVote,  async (request, response, next) => {
+router.patch("/votes/:id", validateVote, async (request, response, next) => {
   try {
     const id = Number(request.params.id);
     const foundVote = await Votes.findByPk(id);
@@ -78,7 +78,7 @@ router.patch("/votes/:id", validateVote,  async (request, response, next) => {
 });
 
 // Route for deleting a vote
-router.delete("/votes/:id", validateVote,  async (request, response, next) => {
+router.delete("/votes/:id", validateVote, async (request, response, next) => {
   try {
     const id = Number(request.params.id);
     const foundVote = await Votes.findByPk(id);
@@ -86,10 +86,10 @@ router.delete("/votes/:id", validateVote,  async (request, response, next) => {
       return response.status(404).send("Failed to update Vote with id:" + id);
     }
     await foundVote.destroy();
-    return response.sendStatus(204)
+    return response.sendStatus(204);
   } catch (error) {
     next(error);
   }
 });
 
-module.exports = router
+module.exports = router;
