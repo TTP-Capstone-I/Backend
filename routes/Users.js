@@ -9,7 +9,7 @@ const Options = allModels.Options;
 const Votes = allModels.Votes;
 const Users = allModels.Users;
 
-// Route for getting all options on a poll.
+// Route for getting all users.
 router.get("/users", async (request, response, next) => {
   try {
     const allUsers = await Users.findAll();
@@ -53,6 +53,7 @@ function validateUserCreation(request, response, next) {
 // Route for creating a new User.
 // Expects a pollId in the body.
 // Later create a validation middleware.'
+// Using localStorage on the frontend we can add to the users.
 router.post("/users", validateUserCreation, async (request, response, next) => {
   try {
     const newUser = await Users.create(request.body);
@@ -65,7 +66,7 @@ router.post("/users", validateUserCreation, async (request, response, next) => {
   }
 });
 
-// Route for updating a option by its Id.
+// Route for updating a user by its Id.
 router.patch("/users/:id", validateUserCreation, async (request, response, next) => {
   try {
     const id = Number(request.params.id);
@@ -82,7 +83,7 @@ router.patch("/users/:id", validateUserCreation, async (request, response, next)
   }
 });
 
-// Route for deleting a option by its Id.
+// Route for deleting a user by its Id.
 router.delete("/users/:id", async (request, response, next) => {
   try {
     const id = Number(request.params.id);

@@ -50,6 +50,7 @@ function validateVote(request, response, next) {
 }
 
 // Route for posting a vote 
+// Check to see if a vote exists in the votes table that matches the pollId and optionId
 router.post("/votes", validateVote, async (request, response, next) => {
     try {
         const newVote = await Votes.create(request.body);
