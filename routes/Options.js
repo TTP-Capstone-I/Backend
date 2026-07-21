@@ -47,7 +47,14 @@ router.get("/options/:id", async (request, response, next) => {
 // If there is no title or pollId return status 400 with a message.
 // Otherwise continue.
 function validateOptionCreation(request, response, next) {
-    next()
+  const{ title, pollId} = request.body;
+
+  if( !title || !pollId){
+    console.log("validation failed!");
+    return response.status(400).send("Title and PollId are required!");
+  }
+  console.log("validation passed!");
+  next();
 }
 
 // Route for creating a new option.

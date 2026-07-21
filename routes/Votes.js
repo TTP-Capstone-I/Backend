@@ -39,7 +39,14 @@ router.get("/votes/:id", async (request, response, next) => {
 // If there is no name or optionId return status 400 with a message.
 // Otherwise continue.
 function validateVote(request, response, next) {
-    next()
+  const{ name, optionId} = request.body;
+
+  if( !name || !optionId){
+    console.log("validation failed!");
+    return response.status(400).send("Name and optionId are required!");
+  }
+  console.log("validation passed!");
+  next();
 }
 
 // Route for posting a vote 
