@@ -119,9 +119,11 @@ app.delete("/polls/:id", async (request, response, next) => {
 // Route for getting all options on a poll.
 app.get("/options", async (request, response, next) => {
   try {
-    const allOptions = await Options.findAll({
-        include: Votes,
-    });
+    const include = request.query.include
+    const where = include === 'true' ?  {
+      include: [{model: Votes},]
+    } : {}
+    const allOptions = await Options.findAll(where);
     if (!allOptions) {
       return response.status(404).send("No Options were found.");
     }
@@ -135,7 +137,11 @@ app.get("/options", async (request, response, next) => {
 app.get("/options/:id", async (request, response, next) => {
   try {
     const id = Number(request.params.id);
-    const foundOption = await Options.findByPk(id);
+    const include = request.query.include
+    const where = include === 'true' ?  {
+      include: [{model: Votes},]
+    } : {}
+    const foundOption = await Options.findByPk(id, where);
     if (!foundOption) {
       return response.status(404).send("No Option was found.");
     }
