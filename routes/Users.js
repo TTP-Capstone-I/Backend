@@ -26,7 +26,7 @@ router.get("/users", async (request, response, next) => {
 router.get("/users/:id", async (request, response, next) => {
   try {
     const id = Number(request.params.id);
-    const foundUser = await Options.findByPk(id);
+    const foundUser = await Users.findByPk(id);
     if (!foundUser) {
       return response.status(404).send("No User was found.");
     }
@@ -40,9 +40,9 @@ router.get("/users/:id", async (request, response, next) => {
 // If there is no title or pollId return status 400 with a message.
 // Otherwise continue.
 function validateUserCreation(request, response, next) {
-  const{ name, email} = request.body;
+  const { name, email } = request.body;
 
-  if( !name || !email){
+  if (!name || !email) {
     console.log("validation failed!");
     return response.status(400).send("Name and Email are required!");
   }
