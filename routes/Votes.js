@@ -72,7 +72,7 @@ router.patch("/votes/:id", validateVote, async (request, response, next) => {
             return response.status(404).send("Failed to Update Vote with id:" + id);
         }
         const updatedVote = await foundVote.update(request.body);
-        return response.status(201).json(updatedVote);
+        return response.status(200).json(updatedVote);
     } catch (error) {
         next(error);
     }
