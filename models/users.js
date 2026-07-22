@@ -4,7 +4,7 @@ const dbConnection = require('../db')
 const Users = dbConnection.define('user',{
     name:{
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     email:{
         type: DataTypes.STRING,
