@@ -83,7 +83,7 @@ router.patch("/options/:id", validateOptionCreation, async (request, response, n
         }
 
         const updatedOption = await foundOption.update(request.body);
-        return response.status(201).json(updatedOption);
+        return response.status(200).json(updatedOption);
     } catch (error) {
         next(error);
     }
