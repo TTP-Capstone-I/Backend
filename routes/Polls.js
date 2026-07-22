@@ -84,7 +84,7 @@ router.patch("/polls/:id", validatePollCreation, async (request, response, next)
         }
 
         const updatedPoll = await foundPoll.update(request.body);
-        return response.status(201).json(updatedPoll);
+        return response.status(200).json(updatedPoll);
     } catch (error) {
         next(error);
     }

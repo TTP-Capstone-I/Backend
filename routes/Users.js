@@ -77,7 +77,7 @@ router.patch("/users/:id", validateUserCreation, async (request, response, next)
     }
 
     const updatedUser = await foundUser.update(request.body);
-    return response.status(201).json(updatedUser);
+    return response.status(200).json(updatedUser);
   } catch (error) {
     next(error);
   }
