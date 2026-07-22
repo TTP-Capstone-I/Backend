@@ -42,8 +42,13 @@ app.get("/check", async (request, response, next) => {
 
 function logErrors(error, request, response, next) {
   console.error(error)
-  next()
+
+  return response.status(500).json({
+    message: "Something went wrong",
+    error: error.message,
+  })
 }
+
 app.use(logErrors)
 
 async function startApp() {
