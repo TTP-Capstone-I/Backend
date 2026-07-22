@@ -69,7 +69,7 @@ router.patch("/votes/:id", validateVote, async (request, response, next) => {
         const id = Number(request.params.id);
         const foundVote = await Votes.findByPk(id);
         if (!foundVote) {
-            return response.status(404).send("Failed to update Vote with id:" + id);
+            return response.status(404).send("Failed to Update Vote with id:" + id);
         }
         const updatedVote = await foundVote.update(request.body);
         return response.status(201).json(updatedVote);
@@ -79,12 +79,12 @@ router.patch("/votes/:id", validateVote, async (request, response, next) => {
 });
 
 // Route for deleting a vote
-router.delete("/votes/:id", validateVote, async (request, response, next) => {
+router.delete("/votes/:id", async (request, response, next) => {
     try {
         const id = Number(request.params.id);
         const foundVote = await Votes.findByPk(id);
         if (!foundVote) {
-            return response.status(404).send("Failed to update Vote with id:" + id);
+            return response.status(404).send("Failed to Delete Vote with id:" + id);
         }
         await foundVote.destroy();
         return response.sendStatus(204)
