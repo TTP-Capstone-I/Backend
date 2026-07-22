@@ -32,7 +32,7 @@ app.use(votesRouter)
 app.use(usersRouter)
 
 // Route for checking if the server works or not.
-app.get("/check", async (request, response, next) => {
+app.get("/", async (request, response, next) => {
   try {
     return response.status(200).send("working");
   } catch (error) {
