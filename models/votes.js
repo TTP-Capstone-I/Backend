@@ -2,9 +2,13 @@ const { DataTypes } = require('sequelize');
 const dbConnection = require('../db')
 
 const Votes = dbConnection.define('vote', {
-    name: {
-        type: DataTypes.STRING,
+    userId: {
+        type: DataTypes.INTEGER,
         allowNull: false
+    },
+    optionId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
     }
 });
 

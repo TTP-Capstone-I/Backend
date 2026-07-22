@@ -9,6 +9,24 @@ const Users = allModels.Users;
 
 async function seed(){
     await dbConnection.sync({force: true})
+
+    const UserOne = await Users.create({
+        email: 'user1@gmail.com',
+    })
+
+    const UserTwo = await Users.create({
+        email: 'user2@gmail.com',
+    })
+
+    const UserThree = await Users.create({
+        email: 'user3@gmail.com',
+    })
+
+    const UserFour = await Users.create({
+        email: 'user4@gmail.com',
+    })
+
+
     const newPoll = await Polls.create({
         title: "Test Poll",
         description: "testing 123",
@@ -26,26 +44,28 @@ async function seed(){
         pollId: newPoll.id,
     })
     const VoteOne = await Votes.create({
-        name: "Vote One",
-        optionId: optionOne.id
+        // name: "Vote One",
+        optionId: optionOne.id,
+        userId: UserOne.id
     })
     const VoteTwo = await Votes.create({
-        name: "Vote Two",
-        optionId: optionTwo.id
+        // name: "Vote Two",
+        optionId: optionTwo.id,
+        userId: UserTwo.id
     })
     const VoteThree = await Votes.create({
-        name: "Vote Three",
-        optionId: optionThree.id
+        // name: "Vote Three",
+        optionId: optionThree.id,
+        userId: UserThree.id
     })
     const VoteFour = await Votes.create({
-        name: "Vote Four",
-        optionId: optionOne.id
+        // name: "Vote Four",
+        optionId: optionOne.id,
+        userId: UserFour.id
     })
-    const UserOne = await Users.create({
-        name: "User One",
-        email: process.env.email
-    })
+
     console.log("SEEDED!")
     dbConnection.close()
 }
+
 seed()
