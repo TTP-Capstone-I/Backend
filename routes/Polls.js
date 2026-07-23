@@ -32,11 +32,7 @@ router.get("/polls/:id", async (request, response, next) => {
     try {
         const id = Number(request.params.id);
         const include = request.query.include
-        const where = include === 'true' ? {
-            include: [{ model: Options, include: Votes },]
-        } : {}
-
-        const poll = await Polls.findByPk(id, where);
+        const poll = await Polls.findByPk(id, {include: [{ model: Options, include: Votes },]});
         if (!poll) {
             return response.status(404).send("Fail to find post with id: " + id);
         }
@@ -51,22 +47,40 @@ router.get("/polls/:id", async (request, response, next) => {
 // Otherwise continue.
 function validatePollCreation(request, response, next) {
     const { title, description } = request.body;
+    const options = request.body.options
 
     if (!title || !description) {
         console.log("validation failed!");
         return response.status(400).send("Title and description are required!");
     }
+
+    if (!options.length >= 2) {
+        console.log("validation failed!");
+        return response.status(400).send("A poll is required to have at least two options!");
+    }
+
     console.log("validation passed!");
     next();
 }
 // Route for creating a new poll.
 // Later create a validation middleware.
+// This should also create new options without needing to make a seperate request for each option.
 router.post("/polls", validatePollCreation, async (request, response, next) => {
     try {
+        const options = request.body
         const newPoll = await Polls.create(request.body);
         if (!newPoll) {
             return response.status(404).send("Failed to add new Poll");
         }
+        
+        // console.log(typeof(options))
+        Object.keys(options).forEach(async option => {
+            const newOption = await Options.create({
+                title: option.title,
+            })  
+            console.log(newOption)
+        })
+
         return response.status(201).json(newPoll);
     } catch (error) {
         next(error);
