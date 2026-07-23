@@ -64,6 +64,48 @@ async function seed(){
         userId: UserFour.id
     })
 
+    const newPoll2 = await Polls.create({
+        title: "What is the best programming language?",
+        description: "What do you think is the best programming language?",
+    })
+    const option_one = await Options.create({
+        title: "JavaScript",
+        pollId: newPoll2.id,
+    })
+    const option_two = await Options.create({
+        title: "Python",
+        pollId: newPoll2.id,
+    })
+    const option_three = await Options.create({
+        title: "C++",
+        pollId: newPoll2.id,
+    })
+    const option_four = await Options.create({
+        title: "C#",
+        pollId: newPoll2.id,
+    })
+    await Votes.create({
+        // name: "Vote One",
+        optionId: option_one.id,
+        userId: UserOne.id
+    })
+    await Votes.create({
+        // name: "Vote Two",
+        optionId: option_two.id,
+        userId: UserTwo.id
+    })
+    await Votes.create({
+        // name: "Vote Three",
+        optionId: option_three.id,
+        userId: UserThree.id
+    })
+    await Votes.create({
+        // name: "Vote Four",
+        optionId: option_one.id,
+        userId: UserFour.id
+    })
+
+
     console.log("SEEDED!")
     dbConnection.close()
 }
