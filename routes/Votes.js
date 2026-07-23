@@ -38,22 +38,34 @@ router.get("/votes/:id", async (request, response, next) => {
 // This function should check if a vote can be added before continuing.
 // If there is no name or optionId return status 400 with a message.
 // Otherwise continue.
-function validateVote(request, response, next) {
-    const { name, optionId } = request.body;
+async function validateVote(request, response, next) {
+    try {
+        const optionId = Number(request.body.optionId);
+        if (!Number.isInteger(optionId) || optionId <= 0) {
+            console.log("validation failed!");
+            return response.status(400).send("A valid optionId is required!");
+        }
 
-    if (!name || !optionId) {
-        console.log("validation failed!");
-        return response.status(400).send("Name and optionId are required!");
+        const foundOption = await Options.findByPk(optionId)
+        if (!foundOption) {
+            return response.status(404).send(`Option with id ${optionId} was not found.`)
+        }
+
+        console.log("validation passed!");
+        next();
+    } catch(error) {
+        next(error)
     }
-    console.log("validation passed!");
-    next();
 }
 
 // Route for posting a vote 
 // Check to see if a vote exists in the votes table that matches the pollId and optionId
 router.post("/votes", validateVote, async (request, response, next) => {
     try {
-        const newVote = await Votes.create(request.body);
+        const optionId = Number(request.body.optionId)
+        const newVote = await Votes.create({
+            optionId: optionId
+        });
         if (!newVote) {
             return response.status(404).send("Failed to add new Vote");
         }
