@@ -66,23 +66,32 @@ function validatePollCreation(request, response, next) {
 // Later create a validation middleware.
 // This should also create new options without needing to make a seperate request for each option.
 router.post("/polls", validatePollCreation, async (request, response, next) => {
+    const {title, description, options} = request.body
+    const newPoll = await Polls.create({
+        title: title,
+        description: description
+    });
+
     try {
-        const options = request.body
-        const newPoll = await Polls.create(request.body);
         if (!newPoll) {
             return response.status(404).send("Failed to add new Poll");
         }
-        
-        // console.log(typeof(options))
-        Object.keys(options).forEach(async option => {
+
+        for (const option of options) {
             const newOption = await Options.create({
                 title: option.title,
-            })  
-            console.log(newOption)
+                pollId: newPoll.id,
+            });
+        }
+
+        // Reload the created poll with its new options
+        await newPoll.reload({
+            include: Options
         })
 
         return response.status(201).json(newPoll);
     } catch (error) {
+        await newPoll.destroy() // Destroy the new poll if any error happens during its creation.
         next(error);
     }
 });
