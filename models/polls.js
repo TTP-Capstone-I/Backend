@@ -9,6 +9,10 @@ const Polls = dbConnection.define('poll', {
     description: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    ownerTokenHash: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 });
 
