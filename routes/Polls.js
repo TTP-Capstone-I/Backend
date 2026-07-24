@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const router = express.Router()
+const crypto = require("crypto")
 
 const allModels = require("../models");
 const dbConnection = allModels.dbConnection
@@ -8,13 +9,22 @@ const Polls = allModels.Polls;
 const Options = allModels.Options;
 const Votes = allModels.Votes;
 
+function generateOwnerToken() {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+function hashOwnerToken(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
 // Route for getting all polls including the options with them.
 router.get("/polls", async (request, response, next) => {
     try {
         // Uses query `?include=true` to also get all the polls with options & votes attached. 
         const include = request.query.include
         const where = include === 'true' ? {
-            include: [{ model: Options, include: Votes },]
+            include: [{ model: Options, include: Votes },],
+            attributes: {exclude: ["ownerTokenHash"],},  // IMPORTANT: Do not include ownerTokenHash in any get responses.
         } : {}
 
         const allPolls = await Polls.findAll(where);
@@ -31,10 +41,12 @@ router.get("/polls", async (request, response, next) => {
 router.get("/polls/:id", async (request, response, next) => {
     try {
         const id = Number(request.params.id);
-        const include = request.query.include
-        const poll = await Polls.findByPk(id, {include: [{ model: Options, include: Votes },]});
+        const poll = await Polls.findByPk(id, {
+            include: [{ model: Options, include: Votes },],
+            attributes: {exclude: ["ownerTokenHash"],},  // IMPORTANT: Do not include ownerTokenHash in any get responses.
+        });
         if (!poll) {
-            return response.status(404).send("Fail to find post with id: " + id);
+            return response.status(404).send("Failed to find poll with id: " + id);
         }
         return response.status(200).json(poll);
     } catch (error) {
@@ -67,9 +79,14 @@ function validatePollCreation(request, response, next) {
 // This should also create new options without needing to make a seperate request for each option.
 router.post("/polls", validatePollCreation, async (request, response, next) => {
     const {title, description, options} = request.body
+
+    // This will get sent back to the browser that created the poll.
+    const ownerToken = generateOwnerToken();
+    const ownerTokenHash = hashOwnerToken(ownerToken);
     const newPoll = await Polls.create({
         title: title,
-        description: description
+        description: description,
+        ownerTokenHash: ownerTokenHash,
     });
 
     try {
@@ -89,7 +106,10 @@ router.post("/polls", validatePollCreation, async (request, response, next) => {
             include: Options
         })
 
-        return response.status(201).json(newPoll);
+        const cleanPoll = newPoll.toJSON()
+        delete cleanPoll.ownerTokenHash  // Delete the stored hash never send it to frontend.
+
+        return response.status(201).json({...cleanPoll, ownerToken});
     } catch (error) {
         await newPoll.destroy() // Destroy the new poll if any error happens during its creation.
         next(error);
@@ -117,10 +137,20 @@ router.patch("/polls/:id", validatePollCreation, async (request, response, next)
 router.delete("/polls/:id", async (request, response, next) => {
     try {
         const id = Number(request.params.id);
-        const foundPoll = await Polls.findByPk(id)
+        const givenToken = request.get("x-owner-token")
 
+        if (!givenToken) {
+            return response.status(401).send("An ownership token is required.")
+        }
+
+        const foundPoll = await Polls.findByPk(id)
         if (!foundPoll) {
             return response.status(404).send("Failed to find Poll with id:", id);
+        }
+
+        const givenTokenHash = hashOwnerToken(givenToken)
+        if (givenTokenHash !== foundPoll.ownerTokenHash) {
+            return response.status(403).send("You are not the authorized to delete this poll.")
         }
 
         await foundPoll.destroy()
