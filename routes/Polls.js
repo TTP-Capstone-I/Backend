@@ -170,7 +170,9 @@ router.post("/polls", validatePollCreation, async (request, response, next) => {
 
         return response.status(201).json({ ...cleanPoll, ownerToken });
     } catch (error) {
-        await newPoll.destroy() // Destroy the new poll if any error happens during its creation.
+        if (newPoll) {
+            await newPoll.destroy() // Destroy the new poll if any error happens during its creation.
+        }
         next(error);
     }
 });

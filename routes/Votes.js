@@ -7,6 +7,10 @@ const Polls = allModels.Polls;
 const Options = allModels.Options;
 const Votes = allModels.Votes;
 
+function hashOwnerToken(token) {
+    return crypto.createHash("sha256").update(token).digest("hex");
+}
+
 // Route for getting all votes.
 router.get("/votes", async (request, response, next) => {
     try {
