@@ -183,6 +183,7 @@ router.patch("/polls/:id", requirePollOwner, validatePollCreation, async (reques
 
         const cleanPoll = updatedPoll.toJSON()
         delete cleanPoll.ownerTokenHash
+
         return response.status(200).json(cleanPoll);
     } catch (error) {
         next(error);
