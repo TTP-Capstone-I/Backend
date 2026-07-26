@@ -7,6 +7,10 @@ const Polls = allModels.Polls;
 const Options = allModels.Options;
 const Votes = allModels.Votes;
 
+function hashOwnerToken(token) {
+    return crypto.createHash("sha256").update(token).digest("hex");
+}
+
 async function requireOptionOwner(request, response, next) {
     try {
         const givenToken = request.get("x-owner-token")
@@ -25,7 +29,7 @@ async function requireOptionOwner(request, response, next) {
             return response.status(404).send("Poll not found.")
         }
 
-        const givenTokenHash = hashOwnerToken(token)
+        const givenTokenHash = hashOwnerToken(givenToken)
         if (givenTokenHash !== poll.ownerTokenHash) {
             return response.status(403).send("You are not authorized to modify this option.")
         }
@@ -51,7 +55,7 @@ async function requireNewOptionOwner(request, response, next) {
             return response.status(404).send("Poll not found.")
         }
 
-        const givenTokenHash = hashOwnerToken(token)
+        const givenTokenHash = hashOwnerToken(givenToken)
         if (givenTokenHash !== poll.ownerTokenHash) {
             return response.status(403).send("You are not authorized to modify this poll.")
         }
