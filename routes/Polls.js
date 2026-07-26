@@ -22,12 +22,10 @@ router.get("/polls", async (request, response, next) => {
     try {
         // Uses query `?include=true` to also get all the polls with options & votes attached. 
         const include = request.query.include
-        const where = include === 'true' ? {
+        const allPolls = await Polls.findAll({
             include: [{ model: Options, include: Votes },],
             attributes: {exclude: ["ownerTokenHash"],},  // IMPORTANT: Do not include ownerTokenHash in any get responses.
-        } : {}
-
-        const allPolls = await Polls.findAll(where);
+        });
         if (!allPolls) {
             return response.status(404).send("No polls were found.");
         }
@@ -54,6 +52,37 @@ router.get("/polls/:id", async (request, response, next) => {
     }
 });
 
+// This function should only allow for patch & delete routes to work if the owner token is correct.
+async function requirePollOwner(request, response, next) {
+    try {
+        const pollId = Number(request.params.id)
+        const givenToken = request.get("x-owner-token")
+
+        if (!givenToken) {
+            return response.status(401).send("An ownership token is required.")
+        }
+
+        const poll = await Polls.findByPk(pollId)
+
+        if (!poll) {
+            return response.status(404).json({
+                message: "Poll not found."
+            })
+        }
+
+        const givenTokenHash = hashOwnerToken(givenToken)
+
+        if (givenTokenHash !== poll.ownerTokenHash) {
+            return response.status(403).send("You are not the authorized to delete this poll.")
+        }
+
+        request.poll = poll
+        next()
+    } catch (error) {
+        next(error)
+    }
+}
+
 // This function should check if poll can be created before continuing.
 // If there is no title and description return status 400 with a message.
 // Otherwise continue.
@@ -66,9 +95,22 @@ function validatePollCreation(request, response, next) {
         return response.status(400).send("Title and description are required!");
     }
 
-    if (!options.length >= 2) {
+    if (!Array.isArray(options) || options.length < 2 || options.length > 5) {
+        if (options.length < 2) {
+            return response.status(400).send("A poll is required to have at least two options!");
+        } else if (options.length > 5) {
+            return response.status(400).send("A poll is required to have at no more than five options!");
+        }
         console.log("validation failed!");
-        return response.status(400).send("A poll is required to have at least two options!");
+        return response.status(400).send("An error occured with options on this poll.");
+    }
+
+    const hasEmptyOption = options.some((option) => {
+        return !option.title?.trim()
+    })
+
+    if (hasEmptyOption) {
+        return response.status(400).send("Every option must have a title.")
     }
 
     console.log("validation passed!");
@@ -117,24 +159,38 @@ router.post("/polls", validatePollCreation, async (request, response, next) => {
 });
 
 // Route for updating a poll by its Id.
-router.patch("/polls/:id", validatePollCreation, async (request, response, next) => {
+router.patch("/polls/:id", requirePollOwner, validatePollCreation, async (request, response, next) => {
     try {
         const id = Number(request.params.id);
+        const { title, description } = request.body
         const foundPoll = await Polls.findByPk(id)
+        const updates = {}
+
+        if (title !== undefined) {
+            updates.title = title
+        }
+
+        if (description !== undefined) {
+            updates.title = description
+        }
 
         if (!foundPoll) {
             return response.status(404).send("Failed to find Poll with id:", id);
         }
 
-        const updatedPoll = await foundPoll.update(request.body);
-        return response.status(200).json(updatedPoll);
+        const { title, description } = request.body
+        const updatedPoll = await request.poll.update(updates)
+
+        const cleanPoll = updatedPoll.toJSON()
+        delete cleanPoll.ownerTokenHash
+        return response.status(200).json(cleanPoll);
     } catch (error) {
         next(error);
     }
 });
 
 // Route for deleting a poll by its Id.
-router.delete("/polls/:id", async (request, response, next) => {
+router.delete("/polls/:id", requirePollOwner,  async (request, response, next) => {
     try {
         const id = Number(request.params.id);
         const givenToken = request.get("x-owner-token")
@@ -154,7 +210,7 @@ router.delete("/polls/:id", async (request, response, next) => {
         }
 
         await foundPoll.destroy()
-        return response.sendStatus(204) // This is important it must be sendStatus
+        return response.sendStatus(204) // This is important it must be sendStatus or else the response will hang
     } catch (error) {
         next(error);
     }
