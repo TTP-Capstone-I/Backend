@@ -1,5 +1,4 @@
 const express = require("express");
-const app = express();
 const router = express.Router()
 
 const allModels = require("../models");
@@ -7,6 +6,62 @@ const dbConnection = allModels.dbConnection
 const Polls = allModels.Polls;
 const Options = allModels.Options;
 const Votes = allModels.Votes;
+
+async function requireOptionOwner(request, response, next) {
+    try {
+        const givenToken = request.get("x-owner-token")
+        if (!givenToken) {
+            return response.status(401).send("An ownership token is required.")
+        }
+
+        const optionId = Number(request.params.id)
+        const option = await Options.findByPk(optionId)
+        if (!option) {
+            return response.status(404).send("Option not found.")
+        }
+
+        const poll = await Polls.findByPk(option.pollId)
+        if (!poll) {
+            return response.status(404).send("Poll not found.")
+        }
+
+        const givenTokenHash = hashOwnerToken(token)
+        if (givenTokenHash !== poll.ownerTokenHash) {
+            return response.status(403).send("You are not authorized to modify this option.")
+        }
+
+        request.option = option
+        request.poll = poll
+        next()
+    } catch (error) {
+        next(error)
+    }
+}
+
+async function requireNewOptionOwner(request, response, next) {
+    try {
+        const givenToken = request.get("x-owner-token")
+        const pollId = Number(request.body.pollId)
+        if (!givenToken) {
+            return response.status(401).send("An ownership token is required.")
+        }
+
+        const poll = await Polls.findByPk(pollId)
+        if (!poll) {
+            return response.status(404).send("Poll not found.")
+        }
+
+        const givenTokenHash = hashOwnerToken(token)
+        if (givenTokenHash !== poll.ownerTokenHash) {
+            return response.status(403).send("You are not authorized to modify this poll.")
+        }
+
+        request.poll = poll
+        next()
+    } catch (error) {
+        next(error)
+    }
+}
 
 // Route for getting all options on a poll.
 router.get("/options", async (request, response, next) => {
@@ -60,7 +115,7 @@ function validateOptionCreation(request, response, next) {
 // Route for creating a new option.
 // Expects a pollId in the body.
 // Later create a validation middleware.'
-router.post("/options", validateOptionCreation, async (request, response, next) => {
+router.post("/options", requireNewOptionOwner, validateOptionCreation, async (request, response, next) => {
     try {
         const newOption = await Options.create(request.body);
         if (!newOption) {
@@ -73,7 +128,7 @@ router.post("/options", validateOptionCreation, async (request, response, next) 
 });
 
 // Route for updating a option by its Id.
-router.patch("/options/:id", validateOptionCreation, async (request, response, next) => {
+router.patch("/options/:id", requireOptionOwner, validateOptionCreation, async (request, response, next) => {
     try {
         const id = Number(request.params.id);
         const foundOption = await Options.findByPk(id)
@@ -90,7 +145,7 @@ router.patch("/options/:id", validateOptionCreation, async (request, response, n
 });
 
 // Route for deleting a option by its Id.
-router.delete("/options/:id", async (request, response, next) => {
+router.delete("/options/:id", requireOptionOwner, async (request, response, next) => {
     try {
         const id = Number(request.params.id);
         const foundOption = await Options.findByPk(id);

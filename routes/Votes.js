@@ -1,5 +1,4 @@
 const express = require("express");
-const app = express();
 const router = express.Router();
 
 const allModels = require("../models");
@@ -75,34 +74,36 @@ router.post("/votes", validateVote, async (request, response, next) => {
     }
 });
 
-// Route for updating a vote
-router.patch("/votes/:id", validateVote, async (request, response, next) => {
-    try {
-        const id = Number(request.params.id);
-        const foundVote = await Votes.findByPk(id);
-        if (!foundVote) {
-            return response.status(404).send("Failed to Update Vote with id:" + id);
-        }
-        const updatedVote = await foundVote.update(request.body);
-        return response.status(200).json(updatedVote);
-    } catch (error) {
-        next(error);
-    }
-});
+// DISABLED FOR NOW
 
-// Route for deleting a vote
-router.delete("/votes/:id", async (request, response, next) => {
-    try {
-        const id = Number(request.params.id);
-        const foundVote = await Votes.findByPk(id);
-        if (!foundVote) {
-            return response.status(404).send("Failed to Delete Vote with id:" + id);
-        }
-        await foundVote.destroy();
-        return response.sendStatus(204)
-    } catch (error) {
-        next(error);
-    }
-});
+// // Route for updating a vote
+// router.patch("/votes/:id", validateVote, async (request, response, next) => {
+//     try {
+//         const id = Number(request.params.id);
+//         const foundVote = await Votes.findByPk(id);
+//         if (!foundVote) {
+//             return response.status(404).send("Failed to Update Vote with id:" + id);
+//         }
+//         const updatedVote = await foundVote.update(request.body);
+//         return response.status(200).json(updatedVote);
+//     } catch (error) {
+//         next(error);
+//     }
+// });
+
+// // Route for deleting a vote
+// router.delete("/votes/:id", async (request, response, next) => {
+//     try {
+//         const id = Number(request.params.id);
+//         const foundVote = await Votes.findByPk(id);
+//         if (!foundVote) {
+//             return response.status(404).send("Failed to Delete Vote with id:" + id);
+//         }
+//         await foundVote.destroy();
+//         return response.sendStatus(204)
+//     } catch (error) {
+//         next(error);
+//     }
+// });
 
 module.exports = router;
