@@ -177,12 +177,11 @@ router.patch("/polls/:id", requirePollOwner, validatePollCreation, async (reques
         if (!foundPoll) {
             return response.status(404).send("Failed to find Poll with id:", id);
         }
-
-        const { title, description } = request.body
+        
         const updatedPoll = await request.poll.update(updates)
-
         const cleanPoll = updatedPoll.toJSON()
         delete cleanPoll.ownerTokenHash
+
         return response.status(200).json(cleanPoll);
     } catch (error) {
         next(error);
