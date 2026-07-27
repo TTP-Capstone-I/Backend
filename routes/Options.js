@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router()
+const crypto = require("crypto")
 
 const allModels = require("../models");
 const dbConnection = allModels.dbConnection
@@ -108,10 +109,14 @@ router.get("/options/:id", async (request, response, next) => {
 function validateOptionCreation(request, response, next) {
     const { title, pollId } = request.body;
 
-    if (!title || !pollId) {
-        console.log("validation failed!");
-        return response.status(400).send("Title and PollId are required!");
+    if (typeof title !== "string" || !title.trim()) {
+        return response.status(400).send("A valid title is required.")
     }
+
+    if (request.method === "POST" && !Number.isInteger(Number(pollId))) {
+        return response.status(400).send("A valid pollId is required.")
+    }
+
     console.log("validation passed!");
     next();
 }
@@ -135,13 +140,13 @@ router.post("/options", requireNewOptionOwner, validateOptionCreation, async (re
 router.patch("/options/:id", requireOptionOwner, validateOptionCreation, async (request, response, next) => {
     try {
         const id = Number(request.params.id);
-        const foundOption = await Options.findByPk(id)
-
-        if (!foundOption) {
+        if (!request.option) {
             return response.status(404).send("Failed to find Option with id:", id);
         }
 
-        const updatedOption = await foundOption.update(request.body);
+        const updatedOption = await request.option.update({
+            title: request.body.title.trim()
+        })
         return response.status(200).json(updatedOption);
     } catch (error) {
         next(error);
