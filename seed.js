@@ -1,11 +1,16 @@
 require("dotenv").config()
+
+if (process.env.NODE_ENV === "production") {
+    console.error("Seed script cannot run in production.")
+    process.exit(1)
+}
+
 const allModels = require("./models");
 const dbConnection = require("./db");
 const Polls = allModels.Polls;
 const Options = allModels.Options;
 const Votes = allModels.Votes;
 const Users = allModels.Users;
-
 
 async function seed(){
     await dbConnection.sync({force: true})
@@ -104,7 +109,6 @@ async function seed(){
         optionId: option_one.id,
         userId: UserFour.id
     })
-
 
     console.log("SEEDED!")
     dbConnection.close()

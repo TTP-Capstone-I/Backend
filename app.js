@@ -2,7 +2,7 @@ require("dotenv").config();
 const morgan = require("morgan");
 const express = require("express");
 const cors = require("cors")
-const cookieParser = require("cookie-parser")
+// const cookieParser = require("cookie-parser")
 const app = express();
 
 const allRoutes = require('./routes')
@@ -24,23 +24,23 @@ const PORT = process.env.PORT;
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors())
-app.use(cookieParser())
+// app.use(cookieParser())
 
 // Make express use the routes we created.
 app.use(pollsRouter)
 app.use(optionsRouter)
 app.use(votesRouter)
-app.use(usersRouter)
+// app.use(usersRouter)
 
-app.get("/cookie", async (request, response, next) => {
-  try {
-    // response.cookie('username', 'me')
-    // response.cookie('something', 'again')
-    return response.status(200).send("working");
-  } catch (error) {
-    next(error);
-  }
-});
+// app.get("/cookie", async (request, response, next) => {
+//   try {
+//     // response.cookie('username', 'me')
+//     // response.cookie('something', 'again')
+//     return response.status(200).send("working");
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 // Route for checking if the server works or not.
 app.get("/", async (request, response, next) => {
